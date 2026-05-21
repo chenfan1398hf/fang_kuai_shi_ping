@@ -77,6 +77,13 @@ public class CubeGeneratorWindow : EditorWindow
             return;
         }
 
+        // 获取预制体的实际缩放（假设原始 Mesh 边长为 1）
+        Vector3 prefabScale = cubePrefab.transform.localScale;
+        // 计算各方向的步长：实际尺寸 + 间隔
+        float stepX = prefabScale.x + spacing;
+        float stepY = prefabScale.y + spacing;
+        float stepZ = prefabScale.z + spacing;
+
         int length, width, height;
         int remainder = 0; // 余数
 
@@ -88,7 +95,6 @@ public class CubeGeneratorWindow : EditorWindow
         }
         else
         {
-            // 自动计算：取总数立方根向下取整，尽量接近正方体
             if (totalCount == 0)
             {
                 Debug.LogWarning("总数为0，不生成任何物体。");
@@ -108,8 +114,6 @@ public class CubeGeneratorWindow : EditorWindow
         GameObject parentObject = new GameObject("BigCube");
         Undo.RegisterCreatedObjectUndo(parentObject, "Create BigCube");
 
-        float step = 1f + spacing; // 相邻中心距离
-
         // ---------- 生成主体部分 (长 x 宽 x 高) ----------
         for (int x = 0; x < length; x++)
         {
@@ -117,7 +121,9 @@ public class CubeGeneratorWindow : EditorWindow
             {
                 for (int z = 0; z < width; z++)
                 {
-                    CreateCubeAt(parentObject, x, y, z, step);
+                    // 使用缩放后的步长计算位置
+                    Vector3 position = new Vector3(x * stepX, y * stepY, z * stepZ);
+                    CreateCubeAt(parentObject, position);
                 }
             }
         }
@@ -125,8 +131,6 @@ public class CubeGeneratorWindow : EditorWindow
         // ---------- 生成余数部分 ----------
         if (sizeMode == SizeMode.AutoTotal && remainder > 0)
         {
-            // 余数排列规则：紧贴在主立方体的X轴正方向，
-            // 每一层可以放 (width * height) 个，层满则继续向外扩展。
             int perSlice = width * height;
 
             for (int i = 0; i < remainder; i++)
@@ -134,11 +138,12 @@ public class CubeGeneratorWindow : EditorWindow
                 int sliceIndex = i / perSlice;
                 int indexInSlice = i % perSlice;
 
-                int addX = length + sliceIndex;                 // X 在主立方体右边依次排列
+                int addX = length + sliceIndex;
                 int addZ = indexInSlice % width;
                 int addY = indexInSlice / width;
 
-                CreateCubeAt(parentObject, addX, addY, addZ, step);
+                Vector3 position = new Vector3(addX * stepX, addY * stepY, addZ * stepZ);
+                CreateCubeAt(parentObject, position);
             }
         }
 
@@ -147,12 +152,13 @@ public class CubeGeneratorWindow : EditorWindow
         Debug.Log($"生成完成：主体 {length}x{width}x{height}，额外 {remainder} 个，总计 {length * width * height + remainder} 个。");
     }
 
-    private void CreateCubeAt(GameObject parent, int x, int y, int z, float step)
+    // 修改后的创建方法，直接接收世界位置（相对父物体）
+    private void CreateCubeAt(GameObject parent, Vector3 localPosition)
     {
         GameObject cube = (GameObject)PrefabUtility.InstantiatePrefab(cubePrefab);
         cube.transform.parent = parent.transform;
-        cube.transform.localPosition = new Vector3(x * step, y * step, z * step);
-        cube.name = $"Cube_{x}_{y}_{z}";
+        cube.transform.localPosition = localPosition;
+        cube.name = $"Cube_{localPosition.x}_{localPosition.y}_{localPosition.z}";
         Undo.RegisterCreatedObjectUndo(cube, "Create BigCube");
     }
 }
