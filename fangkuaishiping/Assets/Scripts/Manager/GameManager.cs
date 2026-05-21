@@ -51,6 +51,7 @@ public class GameManager :MonoSingleton<GameManager>
     private void Start()
     {
         this.InvokeRepeating("CheckTime", 0, 0.1f);
+        StarGame();
     }
 
     void CheckTime()
@@ -328,5 +329,37 @@ public class GameManager :MonoSingleton<GameManager>
             }
         }
         return allGameObjects.ToArray();
+    }
+    public Text uiText;
+    private float sudu = 0.1f;
+    public void StarGame()
+    {
+        StartCoroutine(StarGameIenum());
+    }
+    public IEnumerator StarGameIenum()
+    {
+        uiText.DOTypewriter("样品视频", sudu);
+
+        yield return new WaitForSeconds(2f);
+
+        uiText.DOTypewriter("1分钟心跳75次", sudu);
+
+        yield return new WaitForSeconds(6f);
+
+        uiText.DOTypewriter("1时心跳75×60=4500次", sudu);
+
+        yield return new WaitForSeconds(7f);
+
+        uiText.DOTypewriter("1天心跳75×60×24=108000次", sudu);
+
+        yield return new WaitForSeconds(7f);
+
+        uiText.DOTypewriter("1年心跳75×60×24×365=39420000次", sudu);
+
+        yield return new WaitForSeconds(7f);
+
+        uiText.DOTypewriter("1生心跳75×60×24×365×80＝3153600000次", sudu);
+
+        yield return new WaitForSeconds(7f);
     }
 }
