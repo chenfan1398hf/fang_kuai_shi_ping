@@ -22,7 +22,7 @@ public class GameManager :MonoSingleton<GameManager>
     private int TimeNumber = 0;
     private List<UnityAction> unityActionList = new List<UnityAction>();
     public bool isBattle = true;
-
+    MusicManager musicManager;
 
     public static int TI_LI_MAX_NUMBER = 100;
     public static int TI_LI_CD_NUMBER = 600;
@@ -51,6 +51,7 @@ public class GameManager :MonoSingleton<GameManager>
     private void Start()
     {
         this.InvokeRepeating("CheckTime", 0, 0.1f);
+        musicManager = new MusicManager();
         StarGame();
     }
 
@@ -331,20 +332,32 @@ public class GameManager :MonoSingleton<GameManager>
         return allGameObjects.ToArray();
     }
     public Text uiText;
+    public Text uiText1;
+    public Text uiText2;
+    public Text uiText3;
+
     private float sudu = 0.1f;
     public void StarGame()
     {
+        musicManager.PlayBkMusic("1");
         StartCoroutine(StarGameIenum());
     }
     public IEnumerator StarGameIenum()
     {
-        uiText.DOTypewriter("样品视频", sudu);
+        musicManager.PlaySound("dazi");
+        uiText.DOTypewriter("", sudu);
+        uiText1.DOTypewriter("如：数字1", sudu);
+        uiText2.DOTypewriter("当数字越大时，对应的立方体将会有多大", sudu);
+        uiText3.DOTypewriter("以1立方厘米的立方体形式呈现", sudu);
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(8f);
+        uiText1.gameObject.SetActive(false);
+        uiText2.gameObject.SetActive(false);
+        uiText3.gameObject.SetActive(false);
 
         uiText.DOTypewriter("1分钟心跳75次", sudu);
 
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(4f);
 
         uiText.DOTypewriter("1时心跳75×60=4500次", sudu);
 
